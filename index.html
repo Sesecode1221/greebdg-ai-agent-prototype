@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GreenBDG - AI Decarbonisation Assessment</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <style>
+        /* Custom styles for the demo */
+        .severity-high { background: #fee2e2; border-left: 4px solid #dc2626; }
+        .severity-medium { background: #fef3c7; border-left: 4px solid #f59e0b; }
+        .severity-low { background: #d1fae5; border-left: 4px solid #059669; }
+        
+        .card {
+            transition: all 0.3s ease;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        }
+        
+        .card:hover {
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15), 0 3px 6px rgba(0,0,0,0.10);
+        }
+        
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #059669;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .status-pending { color: #f59e0b; }
+        .status-approved { color: #059669; }
+        .status-rejected { color: #dc2626; }
+        
+        .review-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .review-btn:hover {
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen py-8">
+    <div class="max-w-4xl mx-auto px-4">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">GreenBDG Platform</h1>
+                <p class="text-gray-600">Bertha House · Energy Performance Dashboard</p>
+            </div>
+            <div class="bg-white px-4 py-2 rounded-lg shadow text-sm">
+                <span class="text-gray-500">Organization:</span>
+                <span class="font-semibold text-gray-700">GreenBDG Pilot</span>
+            </div>
+        </div>
+
+        <!-- Building Information -->
+        <div class="card p-6 mb-6">
+            <div class="flex items-start justify-between">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-800">🏢 Bertha House</h2>
+                    <p class="text-gray-600 text-sm mt-1">123 Main Street · Commercial Office · 15,000 sq ft</p>
+                    <div class="flex items-center gap-4 mt-2 text-sm">
+                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded">Active</span>
+                        <span class="text-gray-500">Meters: 3</span>
+                        <span class="text-gray-500">Last reading: 2 hours ago</span>
+                    </div>
+                </div>
+                <div class="text-right text-sm">
+                    <div class="text-gray-500">Reporting Period</div>
+                    <div class="font-semibold">Jul 1 - Jul 31, 2026</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="card p-4 text-center">
+                <div class="text-2xl font-bold text-gray-800">142,500</div>
+                <div class="text-sm text-gray-500">kWh Total Usage</div>
+                <div class="text-xs text-red-600 mt-1">↑ 8.2% vs prior period</div>
+            </div>
+            <div class="card p-4 text-center">
+                <div class="text-2xl font-bold text-gray-800">42.6</div>
+                <div class="text-sm text-gray-500">tCO₂e Emissions</div>
+                <div class="text-xs text-red-600 mt-1">↑ 6.8% vs prior period</div>
+            </div>
+            <div class="card p-4 text-center">
+                <div class="text-2xl font-bold text-gray-800">$18,450</div>
+                <div class="text-sm text-gray-500">Energy Cost</div>
+                <div class="text-xs text-red-600 mt-1">↑ 9.1% vs prior period</div>
+            </div>
+            <div class="card p-4 text-center bg-blue-50 border border-blue-200">
+                <div class="text-2xl font-bold text-blue-600">3</div>
+                <div class="text-sm text-gray-600">Active Anomalies</div>
+                <div class="text-xs text-blue-600 mt-1">⚠️ Requires attention</div>
+            </div>
+        </div>
+
+        <!-- AI Review Section -->
+        <div class="card p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800">
+                        <i class="fas fa-robot text-green-600 mr-2"></i>
+                        AI Decarbonisation Review
+                    </h3>
+                    <p class="text-sm text-gray-500">Gemini 1.5 Pro · Verified GreenBDG Data</p>
+                </div>
+                <div id="last-run" class="text-sm text-gray-400">Not yet run</div>
+            </div>
+
+            <!-- Run AI Review Button -->
+            <button 
+                id="runReviewBtn"
+                class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center gap-2 text-lg"
+            >
+                <i class="fas fa-bolt"></i>
+                Run AI Review
+            </button>
+
+            <!-- Loading State (Hidden by default) -->
+            <div id="loadingState" class="hidden mt-6 text-center py-8">
+                <div class="loading-spinner"></div>
+                <p class="text-gray-700 font-medium">AI is analysing Bertha House data...</p>
+                <p class="text-sm text-gray-500 mt-1">This takes about 10-15 seconds</p>
+                <div class="w-full bg-gray-200 rounded-full h-2.5 mt-4 max-w-md mx-auto">
+                    <div id="progressBar" class="bg-green-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <p id="progressText" class="text-xs text-gray-400 mt-2">Initializing...</p>
+            </div>
+
+            <!-- Assessment Result (Hidden by default) -->
+            <div id="assessmentResult" class="hidden mt-6 fade-in">
+
+                <!-- Status Banner -->
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-clock text-yellow-600 text-xl"></i>
+                        <div>
+                            <p class="font-semibold text-yellow-800">Status: Pending Human Review</p>
+                            <p class="text-sm text-yellow-700">This assessment requires human verification before action</p>
+                        </div>
+                    </div>
+                    <span class="bg-yellow-200 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full">REVIEW REQUIRED</span>
+                </div>
+
+                <!-- Assessment Card -->
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    
+                    <!-- Finding -->
+                    <div class="p-4 bg-gray-50 border-b border-gray-200">
+                        <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Finding</p>
+                        <p class="text-lg font-semibold text-gray-800 mt-1">
+                            Electricity consumption increased 15.3% in July 2026
+                        </p>
+                    </div>
+
+                    <!-- Severity -->
+                    <div class="p-4 border-b border-gray-200 severity-high">
+                        <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Severity</p>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="inline-block w-3 h-3 bg-red-500 rounded-full"></span>
+                            <span class="font-semibold text-red-700">High</span>
+                            <span class="text-sm text-gray-500">· Significant deviation from baseline</span>
+                        </div>
+                    </div>
+
+                    <!-- Supporting Evidence -->
+                    <div class="p-4 border-b border-gray-200">
+                        <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Supporting Evidence</p>
+                        <ul class="mt-2 space-y-2">
+                            <li class="flex items-start gap-2 text-sm">
+                                <i class="fas fa-chart-line text-blue-500 mt-1"></i>
+                                <span><strong>Usage spike:</strong> 45,000 kWh in July vs 39,000 kWh baseline (↑15.3%)</span>
+                            </li>
+                            <li class="flex items-start gap-2 text-sm">
+                                <i class="fas fa-clock text-blue-500 mt-1"></i>
+                                <span><strong>Peak timing:</strong> Highest usage between 15:00-17:00 (↑22% vs baseline)</span>
+                            </li>
+                            <li class="flex items-start gap-2 text-sm">
+                                <i class="fas fa-calendar text-blue-500 mt-1"></i>
+                                <span><strong>Pattern:</strong> Consistent daily spikes every weekday, lower on weekends</span>
+                            </li>
+                            <li class="flex items-start gap-2 text-sm">
+                                <i class="fas fa-thermometer-half text-blue-500 mt-1"></i>
+                                <span><strong>Weather correlation:</strong> Average July temp was 32°C (↑5°C vs last year)</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Likely Causes -->
+                    <div class="p-4 border-b border-gray-200">
+                        <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Likely Causes</p>
+                        <ul class="mt-2 list-disc list-inside space-y-1 text-sm text-gray-700">
+                            <li>HVAC system running longer due to heatwave conditions</li>
+                            <li>Possible cooling system inefficiency or refrigerant leak</li>
+                            <li>After-hours usage pattern suggests HVAC not properly scheduled</li>
+                            <li>Potential occupancy increase or extended operational hours</li>
+                        </ul>
+                    </div>
+
+                    <!-- Recommended Investigation -->
+                    <div class="p-4 border-b border-gray-200 bg-blue-50">
+                        <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Recommended Investigation</p>
+                        <div class="mt-2 space-y-2">
+                            <div class="flex items-start gap-2 text-sm">
+                                <span class="bg-blue-100 text-blue-800 rounded-full px-3 py-0.5 font-bold text-xs">1</span>
+                                <span>Inspect AHU-3 on the 3rd floor for cooling efficiency and leaks</span>
+                            </div>
+                            <div class="flex items-start gap-2 text-sm">
+                                <span class="bg-blue-100 text-blue-800 rounded-full px-3 py-0.5 font-bold text-xs">2</span>
+                                <span>Review HVAC scheduling controls for after-hours optimization</span>
+                            </div>
+                            <div class="flex items-start gap-2 text-sm">
+                                <span class="bg-blue-100 text-blue-800 rounded-full px-3 py-0.5 font-bold text-xs">3</span>
+                                <span>Install submeters to isolate HVAC load from other circuits</span>
+                            </div>
+                            <div class="flex items-start gap-2 text-sm">
+                                <span class="bg-blue-100 text-blue-800 rounded-full px-3 py-0.5 font-bold text-xs">4</span>
+                                <span>Conduct thermal imaging survey to identify heat gain sources</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Confidence -->
+                    <div class="p-4 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Confidence</span>
+                            <span class="font-semibold text-green-700">85%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                            <div class="bg-green-600 h-2 rounded-full" style="width: 85%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Metadata -->
+                    <div class="p-4 bg-gray-50 text-xs text-gray-500 grid grid-cols-2 gap-2">
+                        <div>
+                            <span class="font-semibold">Model:</span> Gemini 1.5 Pro
+                        </div>
+                        <div>
+                            <span class="font-semibold">Prompt Version:</span> v1.2.3
+                        </div>
+                        <div>
+                            <span class="font-semibold">Generated:</span> August 17, 2026 14:32:18
+                        </div>
+                        <div>
+                            <span class="font-semibold">Processing time:</span> 12.4 seconds
+                        </div>
+                    </div>
+
+                    <!-- Human Review Actions -->
+                    <div class="p-4 bg-gray-50 border-t border-gray-200">
+                        <p class="text-sm font-semibold text-gray-700 mb-3">Human Review Required</p>
+                        <div class="flex flex-wrap gap-3">
+                            <button class="review-btn flex-1 min-w-[120px] bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2">
+                                <i class="fas fa-check"></i>
+                                Approve Assessment
+                            </button>
+                            <button class="review-btn flex-1 min-w-[120px] bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2">
+                                <i class="fas fa-times"></i>
+                                Reject
+                            </button>
+                            <button class="review-btn flex-1 min-w-[120px] bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2">
+                                <i class="fas fa-pen"></i>
+                                Request Changes
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-3 italic">
+                            <i class="fas fa-lock text-gray-300 mr-1"></i>
+                            Only authorized reviewers can approve. All actions are logged for audit.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audit Trail Preview (Information Only) -->
+        <div class="card p-4 bg-gray-50 border border-gray-200">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-history text-gray-400"></i>
+                    <span class="text-sm font-semibold text-gray-700">Audit Trail</span>
+                </div>
+                <span class="text-xs text-gray-500">Last 3 assessments</span>
+            </div>
+            <div class="mt-2 text-xs text-gray-500 space-y-1">
+                <div class="flex justify-between border-b border-gray-200 pb-1">
+                    <span>Today 14:32 · AI Review · Pending Review</span>
+                    <span class="text-yellow-600">● Pending</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-200 pb-1">
+                    <span>Aug 15 09:15 · AI Review · Approved by J. Smith</span>
+                    <span class="text-green-600">✓ Approved</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Aug 12 16:45 · AI Review · Rejected by M. Chen</span>
+                    <span class="text-red-600">✗ Rejected</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // DOM Elements
+            const runBtn = document.getElementById('runReviewBtn');
+            const loadingState = document.getElementById('loadingState');
+            const assessmentResult = document.getElementById('assessmentResult');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const lastRun = document.getElementById('last-run');
+
+            // State
+            let isRunning = false;
+
+            // Helper: Update progress bar
+            function updateProgress(percent, text) {
+                progressBar.style.width = percent + '%';
+                progressText.textContent = text || `Processing... ${percent}%`;
+            }
+
+            // Helper: Simulate API call with steps
+            function simulateAIAnalysis() {
+                return new Promise((resolve) => {
+                    const steps = [
+                        { progress: 10, text: 'Connecting to Gemini API...' },
+                        { progress: 25, text: 'Retrieving Bertha House data...' },
+                        { progress: 40, text: 'Analysing meter readings...' },
+                        { progress: 55, text: 'Identifying anomalies...' },
+                        { progress: 70, text: 'Generating assessment...' },
+                        { progress: 85, text: 'Structuring recommendations...' },
+                        { progress: 100, text: 'Assessment ready!' },
+                    ];
+
+                    let stepIndex = 0;
+                    const interval = setInterval(() => {
+                        if (stepIndex < steps.length) {
+                            const step = steps[stepIndex];
+                            updateProgress(step.progress, step.text);
+                            stepIndex++;
+                        } else {
+                            clearInterval(interval);
+                            resolve();
+                        }
+                    }, 800);
+                });
+            }
+
+            // Main: Run AI Review
+            async function runAIReview() {
+                if (isRunning) return;
+                isRunning = true;
+
+                // Reset UI
+                runBtn.disabled = true;
+                runBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                loadingState.classList.remove('hidden');
+                assessmentResult.classList.add('hidden');
+                updateProgress(0, 'Initializing...');
+
+                try {
+                    // Simulate the AI analysis
+                    await simulateAIAnalysis();
+
+                    // Show the assessment result
+                    loadingState.classList.add('hidden');
+                    assessmentResult.classList.remove('hidden');
+                    
+                    // Update timestamp
+                    const now = new Date();
+                    const timeStr = now.toLocaleString('en-US', { 
+                        month: 'long', 
+                        day: 'numeric', 
+                        year: 'numeric',
+                        hour: '2-digit', 
+                        minute: '2-digit',
+                        second: '2-digit'
+                    });
+                    lastRun.textContent = `Last run: ${timeStr}`;
+                    
+                    // Scroll to assessment
+                    assessmentResult.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                } catch (error) {
+                    console.error('AI Review failed:', error);
+                    alert('An error occurred while running the AI review. Please try again.');
+                } finally {
+                    isRunning = false;
+                    runBtn.disabled = false;
+                    runBtn.innerHTML = '<i class="fas fa-bolt"></i> Run AI Review';
+                }
+            }
+
+            // Event Listeners
+            runBtn.addEventListener('click', runAIReview);
+
+            // Human Review Button Handlers (Demo)
+            document.querySelector('.bg-green-600.hover\\:bg-green-700')?.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (confirm('Approve this AI assessment? This action will be logged for audit.')) {
+                    const banner = document.querySelector('.bg-yellow-50');
+                    banner.className = 'bg-green-50 border border-green-200 rounded-lg p-4 mb-4 flex items-center justify-between';
+                    banner.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                            <div>
+                                <p class="font-semibold text-green-800">✓ Approved by Human Reviewer</p>
+                                <p class="text-sm text-green-700">Assessment accepted. Recommendations ready for action.</p>
+                            </div>
+                        </div>
+                        <span class="bg-green-200 text-green-800 text-xs font-bold px-3 py-1 rounded-full">APPROVED</span>
+                    `;
+                    
+                    // Disable buttons
+                    document.querySelectorAll('.review-btn').forEach(btn => {
+                        btn.disabled = true;
+                        btn.classList.add('opacity-50', 'cursor-not-allowed');
+                    });
+                    
+                    alert('Assessment approved successfully! Audit log updated.');
+                }
+            });
+
+            document.querySelector('.bg-red-600.hover\\:bg-red-700')?.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (confirm('Reject this AI assessment? This action will be logged for audit.')) {
+                    const banner = document.querySelector('.bg-yellow-50');
+                    banner.className = 'bg-red-50 border border-red-200 rounded-lg p-4 mb-4 flex items-center justify-between';
+                    banner.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-times-circle text-red-600 text-xl"></i>
+                            <div>
+                                <p class="font-semibold text-red-800">✗ Rejected by Human Reviewer</p>
+                                <p class="text-sm text-red-700">Assessment rejected. Please provide feedback.</p>
+                            </div>
+                        </div>
+                        <span class="bg-red-200 text-red-800 text-xs font-bold px-3 py-1 rounded-full">REJECTED</span>
+                    `;
+                    
+                    document.querySelectorAll('.review-btn').forEach(btn => {
+                        btn.disabled = true;
+                        btn.classList.add('opacity-50', 'cursor-not-allowed');
+                    });
+                    
+                    alert('Assessment rejected. Feedback recommended.');
+                }
+            });
+
+            document.querySelector('.bg-gray-200.hover\\:bg-gray-300')?.addEventListener('click', function(e) {
+                e.preventDefault();
+                const feedback = prompt('Please provide feedback on what needs to change:');
+                if (feedback !== null) {
+                    alert(`Change request submitted with feedback: "${feedback}"`);
+                }
+            });
+
+            console.log('GreenBDG AI Assessment Demo loaded successfully.');
+        })();
+    </script>
+
+</body>
+</html>
